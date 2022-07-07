@@ -100,9 +100,6 @@ const Shortcut = new class Shortcut {
         else {
             return false;
         }
-
-        // キーを格納
-        resultDownKeys.keys = resultKeys;
         
 
         // 第二引数が関数じゃなければ失敗
@@ -111,6 +108,8 @@ const Shortcut = new class Shortcut {
         }
         
 
+        // キーを格納
+        resultDownKeys.keys = resultKeys;////////////////////////////////////////
         
         // 問題なければ代入
         this.#downKeys[id].keys = resultKeyDowns;
