@@ -3,8 +3,8 @@ const Shortcut = new class Shortcut {
 
     /**
      * 現在のIDを格納
-     * @property {number} id
      * @private
+     * @property {number} id
      */
     #id = 1;
 
@@ -13,11 +13,27 @@ const Shortcut = new class Shortcut {
      * 押されたかを確認する登録されたショートカット情報一覧
      * @private
      * @property {Object} downKeys
-     * @property {Object.<number,object>} downKeys.id id自体はidsプロパティに列挙されている
-     * @property {Object.<string, boolean>} downKeys.id.keys setで登録されたキーをプロパティとしたオブジェクト。押されていたらtrueにする
-     * @property {function} downKeys.id.callback ショートカットキーが押されたときに実行する関数
+     * @property {Object.<number,object>} downKeys.#id id自体はidsプロパティに列挙されている
+     * @property {Object.<string, boolean>} downKeys.#id.keys setで登録されたキーをプロパティとしたオブジェクト。押されていたらtrueにする
+     * @property {function} downKeys.#id.callback ショートカットキーが押されたときに実行する関数
      */
     #downKeys = {};
+
+    /*
+    　例：
+     {
+        0: {
+            keys: {
+                Ctrl: false,
+                t: false
+            },
+            listener: {
+                keyup: キーが上がった時のリスナー
+                keydown: キーが下がった時のリスナー
+            }
+        }
+     }
+     */
 
 
 
@@ -56,9 +72,14 @@ const Shortcut = new class Shortcut {
      */
      add(keys, callback) {
         
-        
+        const id = this.#id;
+
+        /** @var {object} id毎に格納されるオブジェクト */
+        const resultDownKeys = {};
+
+        /** @var {object} key一覧を格納 */
+        const resultKeys = {};
         // 配列なら
-        const resultKeyDowns = {};
         if (typeof keys === "object") {
 
             // 値を全てプロパティとして格納
@@ -68,17 +89,20 @@ const Shortcut = new class Shortcut {
                 if (typeof value !== "string") {
                     return false;
                 }
-                resultKeyDowns[value] = false;
+                resultKeys[value] = false;
             });
         }
         // 文字列なら
         else if (typeof keys === "string") {
-            resultKeyDowns[keys] = false;
+            resultKeys[keys] = false;
         }
         // それ以外は失敗として、falseを返す。
         else {
             return false;
         }
+
+        // キーを格納
+        resultDownKeys.keys = resultKeys;
         
 
         // 第二引数が関数じゃなければ失敗
@@ -89,41 +113,67 @@ const Shortcut = new class Shortcut {
 
         
         // 問題なければ代入
-        this.keyDowns[this.id].keys = resultKeyDowns;
-        this.keyDowns[this.id].callback = callback;
+        this.#downKeys[id].keys = resultKeyDowns;
 
 
-        const addEventListenerDown = (event) => {
+        this.#downKeys[id].listener.keydown = (event) => {
             
             const key = event.key;
             // 存在したら
-            if (typeof this.keyDowns[this.#id].keys[key] !== "undefined") {
-                this.keyDowns[this.#id].keys[key] = true;
+            if (typeof this.#downKeys[id].keys[key] !== "undefined") {
+                this.#downKeys[id].keys[key] = true;
 
                 // 押されてる関数を実行
-                this.#getDownKeyFunction();
+                if (this.#isDownKey(id)) {
+                    callback();
+                }
+            }
+        }
+        this.#downKeys[id].listener.keyup = (event) => {
+            const key = event.key;
+            // 存在したら
+            if (typeof this.#downKeys[key] !== "undefined") {
+                this.#downKeys[id].keys[key] = false;
             }
         }
 
 
         
         // 押されたとき
-        document.addEventListener("keydown", addEventListenerDown);
+        document.addEventListener("keydown", this.#downKeys[id].listener.keyup);
 
         // 押しているのを外した時
-        document.addEventListener("keyup", (event) => {
-            const key = event.key;
-            // 存在したら
-            if (typeof this.keyDowns[key] !== "undefined") {
-                this.keyDowns[this.#id].keys[key] = false;
-            }
-        });
+        document.addEventListener("keyup", this.#downKeys[id].listener.keydown);
 
-        return this.id;
-    }
-
-    b() {
-        console.log(this.#id);
+        // 次のIDへ進める
         this.#id++;
+        return id;
     }
+
+
+    /**
+     * セットしたショートカットを削除する
+     * @param {number} id 
+     * @returns {boolean} 削除に成功したらtrue 失敗したらfalse
+     */
+    remove(id) {
+
+        // number以外なら
+        if (typeof id !== "number") {
+            return false;
+        }
+
+        // イベントを削除
+        document.removeEventListener("keydown", this.#downKeys[id].listener.keydown);
+        document.removeEventListener("keyup", this.#downKeys[id].listener.keyup);
+
+        delete this.#downKeys[id];
+
+        if (typeof this.#downKeys[id] !== "undefined") {
+            return false;
+        }
+
+        return true;
+    }
+
 };
