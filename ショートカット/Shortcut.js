@@ -44,12 +44,12 @@ const Shortcut = new class Shortcut {
      * @returns {boolean} 押されていたらtrue
      */
     #isDownKey(id) {
-            
+        
         // 実行時に押されているかを確認
         let result = true;
         Object.keys(this.#downKeys[id].keys).forEach((index) => {
             // 値が一つでもfalseなら
-            if (this.#downKeys[index].keys[index] === false) {
+            if (this.#downKeys[id].keys[index] === false) {
                 result = false;
             }
         })
@@ -107,16 +107,14 @@ const Shortcut = new class Shortcut {
             return false;
         }
         
-
         // キーを格納
-        resultDownKeys.keys = resultKeys;////////////////////////////////////////
-        
-        // 問題なければ代入
-        this.#downKeys[id].keys = resultKeyDowns;
+        resultDownKeys.keys = resultKeys;
 
 
-        this.#downKeys[id].listener.keydown = (event) => {
-            
+        // 追加するリスナー
+        const resultListener = {};
+        resultListener.keydown = (event) => {
+
             const key = event.key;
             // 存在したら
             if (typeof this.#downKeys[id].keys[key] !== "undefined") {
@@ -127,22 +125,27 @@ const Shortcut = new class Shortcut {
                     callback();
                 }
             }
+            
         }
-        this.#downKeys[id].listener.keyup = (event) => {
+
+        resultListener.keyup = (event) => {
             const key = event.key;
             // 存在したら
-            if (typeof this.#downKeys[key] !== "undefined") {
+            if (typeof this.#downKeys[id].keys[key] !== "undefined") {
                 this.#downKeys[id].keys[key] = false;
             }
         }
 
+        resultDownKeys.listener = resultListener;
+
+        this.#downKeys[id] = resultDownKeys;
 
         
         // 押されたとき
-        document.addEventListener("keydown", this.#downKeys[id].listener.keyup);
+        document.addEventListener("keydown", this.#downKeys[id].listener.keydown);
 
         // 押しているのを外した時
-        document.addEventListener("keyup", this.#downKeys[id].listener.keydown);
+        document.addEventListener("keyup", this.#downKeys[id].listener.keyup);
 
         // 次のIDへ進める
         this.#id++;
@@ -156,6 +159,7 @@ const Shortcut = new class Shortcut {
      * @returns {boolean} 削除に成功したらtrue 失敗したらfalse
      */
     remove(id) {
+
 
         // number以外なら
         if (typeof id !== "number") {

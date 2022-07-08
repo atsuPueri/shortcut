@@ -12,18 +12,20 @@
     <script>
 
 
-        const a = {};
-        a.b = "c";
-        console.log(a);
+        let a = "a";
 
-        // a.b.c.d.e.f.g = "val";
+        // bキーを押したときの処理
+        const id = Shortcut.add(["b"], ()=>{
+            a = "b"
+        });
 
-        console.log(a);
+        // kキーを押したときに表示
+        Shortcut.add("k", ()=>{
+            console.log(a);
+        })
 
-        // Shortcut.add(["a", "c", "Ctrl"], ()=>{
-        //     alert("use Shortcut");
-        // });
-
+        // ショートカット削除
+        // Shortcut.remove(id);
 
 
     </script>
