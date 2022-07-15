@@ -7,6 +7,8 @@
     <title>Document</title>
 </head>
 <body>
+
+    <input type="text" name="" id="text" value="test">
     
     <script src="./Shortcut.js"></script>
     <script>
@@ -15,17 +17,16 @@
         let a = "a";
 
         // bキーを押したときの処理
-        const id = Shortcut.add(["b"], ()=>{
-            a = "b"
+        const id = Shortcut.add(["Control", "c"], ()=>{
+
+            a = document.getElementById("text").value;
         });
 
         // kキーを押したときに表示
-        Shortcut.add("k", ()=>{
+        Shortcut.add(["Control", "v"], ()=>{
             console.log(a);
         })
 
-        // ショートカット削除
-        // Shortcut.remove(id);
 
 
     </script>

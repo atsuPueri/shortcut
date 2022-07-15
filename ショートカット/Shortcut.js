@@ -24,7 +24,7 @@ const Shortcut = new class Shortcut {
      {
         0: {
             keys: {
-                Ctrl: false,
+                Control: false,
                 t: false
             },
             listener: {
@@ -52,10 +52,20 @@ const Shortcut = new class Shortcut {
             if (this.#downKeys[id].keys[index] === false) {
                 result = false;
             }
-        })
+        });
 
         return result;
-    }
+    };
+    
+    /**
+     * 指定のIDの押されてる状態を消す
+     * @param {number} id 
+     */
+    #allClear(id) {
+        Object.keys(this.#downKeys[id].keys).forEach((index) => {
+            this.#downKeys[id].keys[index] = false;
+        })
+    };
     
 
 
@@ -123,10 +133,11 @@ const Shortcut = new class Shortcut {
                 // 押されてる関数を実行
                 if (this.#isDownKey(id)) {
                     callback();
+                    this.#allClear(id);
                 }
             }
             
-        }
+        };
 
         resultListener.keyup = (event) => {
             const key = event.key;
@@ -134,7 +145,7 @@ const Shortcut = new class Shortcut {
             if (typeof this.#downKeys[id].keys[key] !== "undefined") {
                 this.#downKeys[id].keys[key] = false;
             }
-        }
+        };
 
         resultDownKeys.listener = resultListener;
 
@@ -150,7 +161,7 @@ const Shortcut = new class Shortcut {
         // 次のIDへ進める
         this.#id++;
         return id;
-    }
+    };
 
 
     /**
@@ -177,6 +188,6 @@ const Shortcut = new class Shortcut {
         }
 
         return true;
-    }
+    };
 
 };
