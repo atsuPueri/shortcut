@@ -133,7 +133,6 @@ const Shortcut = new class Shortcut {
                 // 押されてる関数を実行
                 if (this.#isDownKey(id)) {
                     callback();
-                    this.#allClear(id);
                 }
             }
             
